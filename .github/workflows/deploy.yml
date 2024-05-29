@@ -33,13 +33,16 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Get date for tags
         run: echo "DATE_TAG=$(date -I)" >> "$GITHUB_ENV"
+      - name: Set lowercase repository name
+        id: set_lowercase_repo
+        run: echo "repo_lowercase=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository | toLowerCase }}:${{ matrix.image.name }}
-            ghcr.io/${{ github.repository | toLowerCase }}:${{ matrix.image.name }}-${{ env.DATE_TAG }} 
+            ghcr.io/${{ env.repo_lowercase }}:${{ matrix.image.name }}
+            ghcr.io/${{ env.repo_lowercase }}:${{ matrix.image.name }}-${{ env.DATE_TAG }} 
           context: ./docker-images/
           file: ./docker-images/${{ env.DOCKERFILE_NAME }}.dockerfile
